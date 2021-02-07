@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <script src="{% static 'fontawesome_free/js/all.min.js' %}"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <hr />
+    <h2><a href="{{post.get_absolute_url}}">{{post.title}}</a></h2>
+    <h4>{{post.created_at}}</h4>
+    {% if post.head_image %}
+        <img src="{{post.head_image.url}}" >
+    {% else %}
+        <img src="https://picsum.photos/seed/{{post.id}}/200/300" >
+    {% endif %}
+    <h2>{{post.content}}</h2>
+
+    {% if post.file_upload %}
+        <a href="{{ post.file_upload.url }}" role="button" download>
+        Download:
+            {% if post.get_file_ext == 'csv' %}
+                <i class="fas fa-file-csv"></i>
+            {% elif post.get_file_ext == 'xlsx' or post.get_file_ext == 'xls' %}
+                <i class="fas fa-file-excel"></i>
+            {% elif post.get_file_ext == 'docx' or post.get_file_ext == 'doc' %}
+                <i class="fas fa-file-word"></i>
+            {% elif post.get_file_ext == 'png' or post.get_file_ext == 'jpg' %}
+                <i class="fas fa-file-image"></i>
+            {% else %}
+                <i class="fas fa-file"></i>
+            {% endif %}
+        {{ post.get_file_name }}
+        </a>
+
+
+
+    {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog</title>
+
+</head>
+<body>
+    <h1>blog</h1>
+    {% for post in post_list %}
+        <hr />
+        <h2><a href="{{post.get_absolute_url}}">{{post.title}}</a></h2>
+        <h4>{{post.created_at}}</h4>
+        {% if post.head_image%}
+            <img src="{{post.head_image.url}}" >
+        {% else %}
+            <img src="https://picsum.photos/seed/{{post.id}}/200/300" >
+        {% endif %}
+        <h2>{{post.content}}</h2>
+
+    {% endfor %}
+</body>
+</html>
