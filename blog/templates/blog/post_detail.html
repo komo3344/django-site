@@ -15,6 +15,9 @@
     {% else %}
         <img src="https://picsum.photos/seed/{{post.id}}/200/300" >
     {% endif %}
+    {% if post.hook_text %}
+        <h5>{{ post.hook_text }}</h5>
+    {% endif %}
     <h2>{{post.content}}</h2>
 
     {% if post.file_upload %}

@@ -11,13 +11,16 @@
     {% for post in post_list %}
         <hr />
         <h2><a href="{{post.get_absolute_url}}">{{post.title}}</a></h2>
+        {% if post.hook_text %}
+            <h5>{{ post.hook_text }}</h5>
+        {% endif %}
         <h4>{{post.created_at}}</h4>
         {% if post.head_image%}
             <img src="{{post.head_image.url}}" >
         {% else %}
             <img src="https://picsum.photos/seed/{{post.id}}/200/300" >
         {% endif %}
-        <h2>{{post.content}}</h2>
+        <h2>{{post.content | truncatewords:45}}</h2>
 
     {% endfor %}
 </body>
