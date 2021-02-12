@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <script src="{% static 'fontawesome_free/js/all.min.js' %}"></script>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'blog/base.html' %}
+{% block head %}
+    <title>{{ post.title }} - Blog</title>
+{% endblock %}
+
+{% block content %}
     <hr />
     <h2><a href="{{post.get_absolute_url}}">{{post.title}}</a></h2>
     <h4>{{post.created_at}}</h4>
@@ -36,10 +33,6 @@
             {% endif %}
         {{ post.get_file_name }}
         </a>
-
-
-
     {% endif %}
+{% endblock %}
 
-</body>
-</html>

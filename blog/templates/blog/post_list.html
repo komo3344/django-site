@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>Blog</title>
+{% extends 'blog/base.html' %}
 
-</head>
-<body>
+{% block content %}
     <h1>blog</h1>
     {% for post in post_list %}
         <hr />
@@ -21,7 +15,5 @@
             <img src="https://picsum.photos/seed/{{post.id}}/200/300" >
         {% endif %}
         <h2>{{post.content | truncatewords:45}}</h2>
-
     {% endfor %}
-</body>
-</html>
+{% endblock %}
