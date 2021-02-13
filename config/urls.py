@@ -20,8 +20,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('blog/', include('blog.urls')),
-    path('', include('single_pages.urls')),
+    path('blog/', include('blog.urls', namespace='blog')),
+    path('', include('single_pages.urls', namespace='single_pages')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

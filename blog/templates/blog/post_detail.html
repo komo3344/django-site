@@ -1,21 +1,32 @@
 {% extends 'blog/base.html' %}
-{% block head %}
-    <title>{{ post.title }} - Blog</title>
-{% endblock %}
+{% block title %} {{ post.title }} - Blog {% endblock title %}
 
 {% block content %}
-    <hr />
-    <h2><a href="{{post.get_absolute_url}}">{{post.title}}</a></h2>
-    <h4>{{post.created_at}}</h4>
+    <div id="post-area">
+    <h1 class="mt-4">{{post.title}}</h1>
+    {% if post.hook_text %}
+        <h5 class="text-muted">{{ post.hook_text }}</h5>
+    {% endif %}
+    <p class="lead">
+        by
+        <a href="#">작성자명 쓸 위치</a>
+    </p>
+
+    <hr>
+    {#    Date/Time     #}
+    <p>Posted on {{ post.created_at }}</p>
+
+    <hr>
+
+    {#    Preview Image    #}
     {% if post.head_image %}
         <img src="{{post.head_image.url}}" >
     {% else %}
-        <img src="https://picsum.photos/seed/{{post.id}}/200/300" >
+        <img src="https://picsum.photos/seed/{{post.id}}/800/200" >
     {% endif %}
-    {% if post.hook_text %}
-        <h5>{{ post.hook_text }}</h5>
-    {% endif %}
-    <h2>{{post.content}}</h2>
+
+    {#    Post Content     #}
+    <p>{{post.content}}</p>
 
     {% if post.file_upload %}
         <a href="{{ post.file_upload.url }}" role="button" download>
@@ -34,5 +45,21 @@
         {{ post.get_file_name }}
         </a>
     {% endif %}
+    <hr>
+    </div>
+    <div id="comment-area">
+    {#        Comments Form     #}
+        <div class="card my-4">
+
+        </div>
+    {#    Single Comment    #}
+        <div class="media mb-4">
+
+        </div>
+    {#    Comment with nested comments  #}
+        <div class="media mb-4">
+
+        </div>
+    </div>
 {% endblock %}
 
