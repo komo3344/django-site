@@ -3,13 +3,22 @@
 
 {% block content %}
     <div id="post-area">
+    {% if post.category %}
+        <span class="badge badge-secondary float-right">{{ post.category }}</span>
+    {% else %}
+        <span class="badge badge-secondary float-right">미분류</span>
+    {% endif %}
     <h1 class="mt-4">{{post.title}}</h1>
     {% if post.hook_text %}
         <h5 class="text-muted">{{ post.hook_text }}</h5>
     {% endif %}
     <p class="lead">
         by
-        <a href="#">작성자명 쓸 위치</a>
+        {% if post.author.username is None %}
+            <b>탈퇴한 회원입니다.</b>
+        {% else %}
+            <a href="#">{{ post.author | upper}}</a>
+        {% endif %}
     </p>
 
     <hr>

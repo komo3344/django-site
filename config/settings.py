@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     # ThirdParty Apps
     'fontawesome-free',
+    'django_extensions',    # shell_plus
 ]
 
 MIDDLEWARE = [
