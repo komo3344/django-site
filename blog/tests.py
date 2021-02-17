@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from bs4 import BeautifulSoup
-from .models import Post, Category
+from .models import Post, Category, Tag
 
 
 class TestView(TestCase):
@@ -29,11 +29,17 @@ class TestView(TestCase):
         #         Post(title='테스트케이스3', content='테스트3', author=self.user2),
         #     ]
         # )
+        self.tag_python_kor = Tag.objects.create(name='파이썬 공부', slug='파이썬-공부')
+        self.tag_python = Tag.objects.create(name='python', slug='python')
+        self.tag_hello = Tag.objects.create(name='hello', slug='hello')
         self.post_001 = Post.objects.create(title='테스트케이스1', content='테스트1', author=self.user1,
                                             category=self.category_programming)
+        self.post_001.tags.add(self.tag_hello)
         self.post_002 = Post.objects.create(title='테스트케이스2', content='테스트2', author=self.user2,
                                             category=self.category_music)
         self.post_003 = Post.objects.create(title='테스트케이스3', content='테스트3', author=self.user2)
+        self.post_003.tags.add(self.tag_python_kor)
+        self.post_003.tags.add(self.tag_python)
 
     def category_card_test(self, soup):
         categories_card = soup.find('div', id='categories-card')
@@ -122,17 +128,28 @@ class TestView(TestCase):
         self.assertNotIn('아직 게시물이 없습니다', main_area)
 
         post_001_card = main_area.find('div', id='post-1')
-        post_002_card = main_area.find('div', id='post-2')
-        post_003_card = main_area.find('div', id='post-3')
-        # for post in self.post_list:
-        #     self.assertIn(post.title, post_001_card.text)
-        #     self.assertIn(post.title, post_002_card.text)
-        #     self.assertIn(post.title, post_003_card.text)
         self.assertIn(self.post_001.title, post_001_card.text)
+        self.assertIn(self.post_001.category.name, post_001_card.text)
+        self.assertIn(self.post_001.author.username.upper(), post_001_card.text)
+        self.assertIn(self.tag_hello.name, post_001_card.text)
+        self.assertNotIn(self.tag_python.name, post_001_card)
+        self.assertNotIn(self.tag_python_kor.name, post_001_card)
+
+        post_002_card = main_area.find('div', id='post-2')
         self.assertIn(self.post_002.title, post_002_card.text)
+        self.assertIn(self.post_002.category.name, post_002_card.text)
+        self.assertIn(self.post_002.author.username.upper(), post_002_card.text)
+        self.assertNotIn(self.tag_hello.name, post_002_card.text)
+        self.assertNotIn(self.tag_python.name, post_002_card.text)
+        self.assertNotIn(self.tag_python_kor.name, post_002_card.text)
+
+        post_003_card = main_area.find('div', id='post-3')
+        self.assertIn('미분류', post_003_card.text)
         self.assertIn(self.post_003.title, post_003_card.text)
-        self.assertIn(self.user1.username.upper(), main_area.text)
-        self.assertIn(self.user2.username.upper(), main_area.text)
+        self.assertIn(self.post_003.author.username.upper(), post_003_card.text)
+        self.assertNotIn(self.tag_hello.name, post_003_card.text)
+        self.assertIn(self.tag_python.name, post_003_card.text)
+        self.assertIn(self.tag_python_kor.name, post_003_card.text)
 
         # 포스트가 없는 경우
         Post.objects.all().delete()
@@ -172,6 +189,11 @@ class TestView(TestCase):
         main_area = soup.find('div', id='main-area')
         post_area = main_area.find('div', id='post-area')
         self.assertIn(self.post_001.title, post_area.text)
+        self.assertIn(self.post_001.content, post_area.text)
+
+        self.assertIn(self.tag_hello.name, post_area.text)
+        self.assertNotIn(self.tag_python.name, post_area.text)
+        self.assertNotIn(self.tag_python_kor.name, post_area.text)
         self.assertIn(self.category_programming.name, post_area.text)
         # 2.5 첫 번째 포스트의 작성자가 포스트 영역에 있다.
         self.assertIn(self.user1.username.upper(), post_area.text)

@@ -6,6 +6,17 @@ from core import models as core_models
 from django.contrib.auth.models import User
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = '태그'
+
+
 class Category(core_models.DateTime):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
@@ -14,7 +25,7 @@ class Category(core_models.DateTime):
         return self.name
 
     def get_absolute_url(self):
-        return f'/blog/category/{self.slug}/'
+        return f'/blog/tag/{self.slug}/'
 
     class Meta:
         verbose_name_plural = '카테고리'
@@ -23,6 +34,7 @@ class Category(core_models.DateTime):
 class Post(core_models.DateTime):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(Tag, blank=True)
     title = models.CharField(max_length=30)
     content = models.TextField()
     hook_text = models.CharField(max_length=100, blank=True)
