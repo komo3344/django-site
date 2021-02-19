@@ -1,6 +1,8 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from bs4 import BeautifulSoup
+from django.urls import reverse
+
 from .models import Post, Category, Tag
 
 
@@ -8,11 +10,12 @@ class TestView(TestCase):
     def setUp(self):
         self.client = Client()
         self.user1 = User.objects.create_user(
-            username='user1', password='user1'
+            username='user1', password='user1', is_staff=True
         )
         self.user2 = User.objects.create_user(
             username='user2', password='user2'
         )
+
         # self.category_list = Category.objects.bulk_create(
         #     [
         #         Category(name='programming', slug='programming'),
@@ -40,6 +43,22 @@ class TestView(TestCase):
         self.post_003 = Post.objects.create(title='테스트케이스3', content='테스트3', author=self.user2)
         self.post_003.tags.add(self.tag_python_kor)
         self.post_003.tags.add(self.tag_python)
+
+    def test_tag_page(self):
+        response = self.client.get(self.tag_hello.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.navbar_test(soup)
+        self.category_card_test(soup)
+
+        self.assertIn(self.tag_hello.name, soup.h1.text)
+
+        main_area = soup.find('div', id='main-area')
+        self.assertIn(self.tag_hello.name, main_area.text)
+        self.assertIn(self.post_001.title, main_area.text)
+        self.assertNotIn(self.post_002.title, main_area.text)
+        self.assertNotIn(self.post_003.title, main_area.text)
 
     def category_card_test(self, soup):
         categories_card = soup.find('div', id='categories-card')
@@ -215,3 +234,94 @@ class TestView(TestCase):
         self.assertIn(self.post_001.title, main_area.text)
         self.assertNotIn(self.post_002.title, main_area.text)
         self.assertNotIn(self.post_003.title, main_area.text)
+
+    def test_create_post(self):
+        # 비로그인
+        response = self.client.get('/blog/create_post/')
+        self.assertNotEqual(response.status_code, 200)
+
+        # 비스태프
+        self.client.login(username='user2', password='user2')
+        response = self.client.get(reverse('blog:create'))
+        self.assertNotEqual(response.status_code, 200)
+
+        # 스태프
+        self.client.login(username='user1', password='user1')
+        response = self.client.get(reverse('blog:create'))
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.assertEqual('Create Post - Blog', soup.title.text)
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Create New Post', main_area.text)
+
+        tag_str_input = main_area.find('input', id='id_tags_str')
+        self.assertTrue(tag_str_input)
+
+        self.client.post(
+            '/blog/create_post/',
+            {
+                'title': 'Post Form 만들기',
+                'content': 'Post Form 페이지를 만듭시다.',
+                'tags_str': 'new tag; 한글 태그, python'
+            }
+        )
+        last_post = Post.objects.last()
+        self.assertEqual(last_post.title, "Post Form 만들기")
+        self.assertEqual(last_post.author.username, 'user1')
+
+        self.assertEqual(last_post.tags.count(), 3)
+        self.assertTrue(Tag.objects.get(name='new tag'))
+        self.assertTrue(Tag.objects.get(name='한글 태그'))
+        self.assertEqual(Tag.objects.count(), 5)
+
+    def test_update_post(self):
+        update_post_url = reverse('blog:update', args=[self.post_003.pk])
+
+        # 로그인하지 않은 경우
+        response = self.client.get(update_post_url)
+        self.assertNotEqual(response.status_code, 200)
+
+        # 로그인은 했지만 작성자가 아닌 경우
+        self.assertNotEqual(self.post_003.author, self.user1)
+        self.client.login(username=self.user2.username, passwrd='user1')
+        response = self.client.get(update_post_url)
+        self.assertEqual(response.status_code, 403)  # 302 (redirect 되어서)
+
+        # 작성자(user2)가 접근하는 경우
+        self.client.login(username=self.post_003.author.username, password='user2')
+        response = self.client.get(update_post_url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.assertEqual('Edit Post - Blog', soup.title.text)
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Edit Post', main_area.text)
+
+        tag_str_input = main_area.find('input', id='id_tags_str')
+        self.assertTrue(tag_str_input)
+        self.assertIn('파이썬 공부; python', tag_str_input.attrs['value'])
+
+        response = self.client.post(
+            update_post_url,
+            {
+                'title': '세 번째 포스트를 수정했습니다.',
+                'content': '안녕 세계? 우리는 하나!',
+                'category': self.category_music.pk,
+                'tags_str': '파이썬 공부; 한글 태그, some tag'
+            },
+            # If you set follow to True the client will follow any redirects and
+            # a redirect_chain attribute will be set in the response object containing
+            # tuples of the intermediate urls and status codes.
+            follow=True
+        )
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('세 번째 포스트를 수정했습니다.', main_area.text)
+        self.assertIn('안녕 세계? 우리는 하나!', main_area.text)
+        self.assertIn(self.category_music.name, main_area.text)
+        self.assertIn('파이썬 공부', main_area.text)
+        self.assertIn('한글 태그', main_area.text)
+        self.assertIn('some tag', main_area.text)
+        self.assertNotIn('python', main_area.text)

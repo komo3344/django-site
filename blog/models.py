@@ -1,6 +1,8 @@
 import os
 
 from django.db import models
+from django.urls import reverse
+
 from core import models as core_models
 # FIXME custom user로 수정
 from django.contrib.auth.models import User
@@ -12,6 +14,9 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('blog:tag', args=[self.slug])
 
     class Meta:
         verbose_name_plural = '태그'
@@ -25,7 +30,7 @@ class Category(core_models.DateTime):
         return self.name
 
     def get_absolute_url(self):
-        return f'/blog/tag/{self.slug}/'
+        return reverse('blog:category', args=[self.slug])
 
     class Meta:
         verbose_name_plural = '카테고리'
@@ -45,7 +50,7 @@ class Post(core_models.DateTime):
         return self.title
 
     def get_absolute_url(self):
-        return f'/blog/{self.pk}/'
+        return reverse('blog:detail', args=[self.id])
 
     def get_file_name(self):
         return os.path.basename(self.file_upload.name)
