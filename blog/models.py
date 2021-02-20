@@ -2,7 +2,8 @@ import os
 
 from django.db import models
 from django.urls import reverse
-
+from markdownx.models import MarkdownxField
+from markdownx.utils import markdown
 from core import models as core_models
 # FIXME custom user로 수정
 from django.contrib.auth.models import User
@@ -41,7 +42,7 @@ class Post(core_models.DateTime):
     category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
     title = models.CharField(max_length=30)
-    content = models.TextField()
+    content = MarkdownxField()
     hook_text = models.CharField(max_length=100, blank=True)
     head_image = models.ImageField(blank=True, upload_to='blog/images/%Y/%m/%d/')
     file_upload = models.FileField(blank=True, upload_to='blog/files/%Y/%m/%d/')
@@ -57,6 +58,9 @@ class Post(core_models.DateTime):
 
     def get_file_ext(self):
         return self.get_file_name().split('.')[-1]
+
+    def get_content_markdown(self):
+        return markdown(self.content)
 
     class Meta:
         verbose_name_plural = '게시글'

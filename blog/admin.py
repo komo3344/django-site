@@ -1,9 +1,10 @@
 from django.contrib import admin
+from markdownx.admin import MarkdownxModelAdmin
 from .models import Post, Category, Tag
 
 
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(MarkdownxModelAdmin):
     list_display = ('id', 'title', 'author', 'created_at')
     list_display_links = ('title',)
     # fields = ('title', 'content', 'created_at', 'updated_at')
