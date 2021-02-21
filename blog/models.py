@@ -64,3 +64,18 @@ class Post(core_models.DateTime):
 
     class Meta:
         verbose_name_plural = '게시글'
+
+
+class Comment(core_models.DateTime):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+
+    def __str__(self):
+        return f'{self.author}::{self.content}'
+
+    def get_absolute_url(self):
+        return f'{self.post.get_absolute_url()}#comment-{self.pk}'
+
+    class Meta:
+        verbose_name_plural = '댓글'
