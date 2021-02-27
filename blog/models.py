@@ -77,5 +77,11 @@ class Comment(core_models.DateTime):
     def get_absolute_url(self):
         return f'{self.post.get_absolute_url()}#comment-{self.pk}'
 
+    def get_avatar_url(self):
+        if self.author.socialaccount_set.exists():
+            return self.author.socialaccount_set.first().get_avatar_url()
+        else:
+            return 'http://placehold.it/50x50'
+
     class Meta:
         verbose_name_plural = '댓글'
