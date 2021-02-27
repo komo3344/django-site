@@ -62,6 +62,12 @@ class Post(core_models.DateTime):
     def get_content_markdown(self):
         return markdown(self.content)
 
+    def get_avatar_url(self):
+        if self.author.socialaccount_set.exists():
+            return self.author.socialaccount_set.first().get_avatar_url()
+        else:
+            return 'http://placehold.it/50x50'
+
     class Meta:
         verbose_name_plural = '게시글'
 
